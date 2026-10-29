@@ -1,7 +1,7 @@
 # App de Ventas – Angular
 
 Front en Angular 16 para gestionar productos y ventas. Consume la API de Laravel del repositorio
-[grupokimtek/api-sales](https://github.com/grupokimtek/api-sales).
+[fabio-daniel/api-sales](https://github.com/fabio-daniel/api-sales).
 
 ## Demo en línea
 
@@ -31,7 +31,7 @@ Front en Angular 16 para gestionar productos y ventas. Consume la API de Laravel
 ## Instalación y ejecución
 
 ```bash
-git clone https://github.com/grupokimtek/app-sales.git
+git clone https://github.com/fabio-daniel/app-sales.git
 cd app-sales
 npm ci
 npm start
