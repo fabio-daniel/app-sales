@@ -1,19 +1,36 @@
 <nav class="navbar navbar-dark navbar-expand-lg">
   <div class="container-md">
-    <a class="navbar-brand" routerLink="/">Prueba<span>Tecnica</span></a>
+    <a class="navbar-brand d-flex align-items-center gap-2" routerLink="/">
+      <span class="brand-icon"><i class="ri-shopping-bag-3-fill"></i></span>
+      <span>Prueba<span class="brand-accent">Tecnica</span></span>
+    </a>
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarToggler"
       aria-controls="navbarToggler" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
     </button>
     <div class="collapse navbar-collapse" id="navbarToggler">
-      <ul class="navbar-nav ms-auto">
-        <li class="nav-item me-lg-2">
-          <a class="nav-link" routerLinkActive="active" routerLink="/inicio">Inicio</a>
+      <ul class="navbar-nav ms-lg-4 me-auto">
+        <li class="nav-item me-lg-1">
+          <a class="nav-link" routerLinkActive="active" routerLink="/home">Inicio</a>
+        </li>
+        <li class="nav-item me-lg-1">
+          <a class="nav-link" routerLinkActive="active" routerLink="/products">Productos</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" routerLinkActive="active" routerLink="/posts">Posts</a>
+          <a class="nav-link" routerLinkActive="active" routerLink="/sales">Ventas</a>
         </li>
       </ul>
+
+      <div class="theme-switch" role="group" aria-label="Cambiar tema">
+        <button type="button" title="Tema claro" aria-label="Tema claro"
+          [class.active]="themeService.theme === 'light'" (click)="themeService.set('light')">
+          <i class="ri-sun-line"></i>
+        </button>
+        <button type="button" title="Tema oscuro" aria-label="Tema oscuro"
+          [class.active]="themeService.theme === 'dark'" (click)="themeService.set('dark')">
+          <i class="ri-moon-line"></i>
+        </button>
+      </div>
     </div>
   </div>
 </nav>

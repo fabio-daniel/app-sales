@@ -1,3 +1,151 @@
-<section class="d-flex align-items-center justify-content-center flex-column text-center">
-  <h1 class="fw-bold mb-3">Bienvenid@ </h1>
-</section>
+<div class="d-flex align-items-center justify-content-between flex-wrap gap-2 my-4">
+  <div>
+    <h2 class="section-title">Resumen</h2>
+    <p class="dash-sub">Así van tus ventas</p>
+  </div>
+  <div class="d-flex gap-2">
+    <a class="btn btn-outline-primary" routerLink="/sales">Ver ventas</a>
+    <a class="btn btn-primary" routerLink="/sales/new">Nueva venta</a>
+  </div>
+</div>
+
+<p class="text-center dash-sub my-5" *ngIf="loading">Cargando datos...</p>
+
+<ng-container *ngIf="!loading">
+  <!-- Indicadores -->
+  <div class="kpis">
+    <article class="kpi">
+      <span class="kpi__icon"><i class="ri-wallet-3-line"></i></span>
+      <div>
+        <small>Total vendido</small>
+        <strong>{{ revenue | money }}</strong>
+        <span class="kpi__hint">Promedio por venta: {{ avgTicket | money }}</span>
+      </div>
+    </article>
+    <article class="kpi">
+      <span class="kpi__icon kpi__icon--green"><i class="ri-bill-line"></i></span>
+      <div>
+        <small>Ventas</small>
+        <strong>{{ salesCount | number }}</strong>
+        <span class="kpi__hint">Registradas</span>
+      </div>
+    </article>
+    <article class="kpi">
+      <span class="kpi__icon kpi__icon--amber"><i class="ri-stack-line"></i></span>
+      <div>
+        <small>Unidades vendidas</small>
+        <strong>{{ units | number }}</strong>
+        <span class="kpi__hint">En todas las ventas</span>
+      </div>
+    </article>
+    <article class="kpi">
+      <span class="kpi__icon kpi__icon--violet"><i class="ri-price-tag-3-line"></i></span>
+      <div>
+        <small>Descuentos otorgados</small>
+        <strong>{{ discount | money }}</strong>
+        <span class="kpi__hint">Sobre {{ revenue + discount | money }} sin descuento</span>
+      </div>
+    </article>
+  </div>
+
+  <div class="dash-grid">
+    <!-- Ventas por día -->
+    <section class="dash-card dash-card--span2">
+      <header>
+        <h3>Ventas por día</h3>
+        <span>Últimos {{ days }} días</span>
+      </header>
+
+      <p class="dash-empty" *ngIf="!maxDaily">No hay ventas en este período.</p>
+
+      <div class="bars" *ngIf="maxDaily">
+        <div class="bars__axis">
+          <span>{{ compact(maxDaily) }}</span>
+          <span>{{ compact(maxDaily / 2) }}</span>
+          <span>0</span>
+        </div>
+        <div class="bars__plot">
+          <div class="bars__area">
+            <div class="bars__col" *ngFor="let day of daily" [title]="day.label + ': ' + (day.total | money)">
+              <div class="bars__bar" [class.is-empty]="!day.total" [style.height.%]="day.pct"></div>
+            </div>
+          </div>
+          <div class="bars__labels">
+            <span *ngFor="let day of daily">{{ day.label }}</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Reparto por producto -->
+    <section class="dash-card">
+      <header>
+        <h3>Ventas por producto</h3>
+        <span>Participación del monto</span>
+      </header>
+
+      <p class="dash-empty" *ngIf="!slices.length">Aún no hay ventas.</p>
+
+      <div class="donut-wrap" *ngIf="slices.length">
+        <svg class="donut" viewBox="0 0 42 42" role="img" aria-label="Participación de cada producto en el monto vendido">
+          <circle class="donut__ring" cx="21" cy="21" r="15.91549430918954" fill="none" stroke-width="5"></circle>
+          <circle *ngFor="let slice of slices" cx="21" cy="21" r="15.91549430918954" fill="none" stroke-width="5"
+            [attr.stroke]="slice.color" [attr.stroke-dasharray]="slice.pct + ' ' + (100 - slice.pct)"
+            [attr.stroke-dashoffset]="25 - slice.offset">
+            <title>{{ slice.name }}: {{ slice.pct | number: '1.0-1' }}%</title>
+          </circle>
+          <text x="21" y="20.5" text-anchor="middle" class="donut__value">{{ compact(revenue) }}</text>
+          <text x="21" y="25" text-anchor="middle" class="donut__caption">total</text>
+        </svg>
+
+        <ul class="legend">
+          <li *ngFor="let slice of slices">
+            <i [style.background-color]="slice.color"></i>
+            <span class="legend__name" [title]="slice.name">{{ slice.name }}</span>
+            <span class="legend__pct">{{ slice.pct | number: '1.0-1' }}%</span>
+          </li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- Más vendidos -->
+    <section class="dash-card dash-card--span2">
+      <header>
+        <h3>Productos más vendidos</h3>
+        <span>Por unidades</span>
+      </header>
+
+      <p class="dash-empty" *ngIf="!topProducts.length">Aún no hay ventas.</p>
+
+      <ul class="hbars" *ngIf="topProducts.length">
+        <li *ngFor="let product of topProducts">
+          <div class="hbars__top">
+            <span class="hbars__name" [title]="product.name">{{ product.name }}</span>
+            <span class="hbars__value">{{ product.units | number }} u. · {{ product.amount | money }}</span>
+          </div>
+          <div class="hbars__track"><div class="hbars__fill" [style.width.%]="product.pct"></div></div>
+        </li>
+      </ul>
+    </section>
+
+    <!-- Últimas ventas -->
+    <section class="dash-card">
+      <header>
+        <h3>Últimas ventas</h3>
+        <a routerLink="/sales">Ver todas</a>
+      </header>
+
+      <p class="dash-empty" *ngIf="!latest.length">Aún no hay ventas.</p>
+
+      <ul class="latest" *ngIf="latest.length">
+        <li *ngFor="let sale of latest">
+          <div>
+            <strong>Venta #{{ sale.id }}</strong>
+            <small>{{ sale.user?.name ?? '—' }} · {{ sale.created_at_datetime | date: 'dd/MM HH:mm' }}</small>
+          </div>
+          <span>{{ sale.total | money }}</span>
+        </li>
+      </ul>
+    </section>
+  </div>
+</ng-container>

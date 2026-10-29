@@ -1,0 +1,192 @@
+<div class="d-flex align-items-center justify-content-between my-4">
+  <h2 class="section-title">Ventas</h2>
+  <a class="btn btn-primary" routerLink="/sales/new">Nueva venta</a>
+</div>
+
+<!-- Filtros -->
+<form class="filters" (submit)="$event.preventDefault()">
+  <div class="row g-2 align-items-end">
+    <div class="col-12 col-lg-4">
+      <label class="form-label" for="f-search">Buscar</label>
+      <div class="filters__search">
+        <i class="ri-search-line"></i>
+        <input id="f-search" type="search" class="form-control" placeholder="# venta, cliente, correo o producto..."
+          [ngModel]="search" (ngModelChange)="search = $event; applyFilters()" name="search" autocomplete="off">
+      </div>
+    </div>
+    <div class="col-6 col-lg-2">
+      <label class="form-label" for="f-from">Desde</label>
+      <input id="f-from" type="date" class="form-control" [max]="dateTo || null"
+        [ngModel]="dateFrom" (ngModelChange)="dateFrom = $event; applyFilters()" name="dateFrom">
+    </div>
+    <div class="col-6 col-lg-2">
+      <label class="form-label" for="f-to">Hasta</label>
+      <input id="f-to" type="date" class="form-control" [min]="dateFrom || null"
+        [ngModel]="dateTo" (ngModelChange)="dateTo = $event; applyFilters()" name="dateTo">
+    </div>
+    <div class="col-6 col-lg-1">
+      <label class="form-label" for="f-min">Total mín.</label>
+      <input id="f-min" type="number" min="0" class="form-control" placeholder="0"
+        [ngModel]="minTotal" (ngModelChange)="minTotal = $event === '' ? null : $event; applyFilters()" name="minTotal">
+    </div>
+    <div class="col-6 col-lg-1">
+      <label class="form-label" for="f-max">Total máx.</label>
+      <input id="f-max" type="number" min="0" class="form-control" placeholder="∞"
+        [ngModel]="maxTotal" (ngModelChange)="maxTotal = $event === '' ? null : $event; applyFilters()" name="maxTotal">
+    </div>
+    <div class="col-12 col-lg-2">
+      <button type="button" class="btn btn-outline-secondary w-100 filters__clear" [disabled]="!hasFilters"
+        (click)="clearFilters()">
+        <i class="ri-filter-off-line"></i> Limpiar filtros
+      </button>
+    </div>
+  </div>
+</form>
+
+<div class="table-responsive">
+  <table class="table align-middle sales-table">
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Fecha</th>
+        <th>Cliente</th>
+        <th>Productos</th>
+        <th class="text-end">Total</th>
+        <th class="table-head-action text-center">Acciones</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngIf="loading">
+        <td colspan="6" class="text-center">Cargando...</td>
+      </tr>
+      <tr *ngIf="!loading && !sales.length">
+        <td colspan="6" class="text-center">Aún no hay ventas registradas.</td>
+      </tr>
+      <tr *ngIf="!loading && sales.length && !filtered.length">
+        <td colspan="6" class="text-center">No hay ventas que coincidan con los filtros.</td>
+      </tr>
+      <tr class="sale-row" *ngFor="let sale of paged" (click)="open(sale)">
+        <td class="fw-bold">{{ sale.id }}</td>
+        <td>
+          <div>{{ sale.created_at_datetime | date: 'dd/MM/yyyy' }}</div>
+          <div class="small text-secondary">{{ sale.created_at_datetime | date: 'HH:mm' }}</div>
+        </td>
+        <td>
+          <ng-container *ngIf="sale.user; else noUser">
+            <div>{{ sale.user.name }}</div>
+            <div class="small text-secondary">{{ sale.user.email }}</div>
+          </ng-container>
+          <ng-template #noUser><span class="text-secondary">—</span></ng-template>
+        </td>
+        <td>
+          {{ sale.details.length }} {{ sale.details.length === 1 ? 'producto' : 'productos' }}
+          <div class="small text-secondary">{{ sale.units | number }} {{ sale.units === 1 ? 'unidad' : 'unidades' }}</div>
+        </td>
+        <td class="text-end">
+          <div class="fw-bold">{{ sale.total | money }}</div>
+          <div class="small text-discount" *ngIf="sale.total_discount > 0">Desc. -{{ sale.total_discount | money }}</div>
+        </td>
+        <td class="table-data-action">
+          <div>
+            <button type="button" class="btn p-0 border-0" title="Ver detalle" (click)="open(sale); $event.stopPropagation()">
+              <i class="ri-eye-line"></i>
+            </button>
+            <button type="button" class="btn p-0 border-0" title="Eliminar" (click)="delete(sale); $event.stopPropagation()">
+              <i class="ri-delete-bin-line"></i>
+            </button>
+          </div>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- Paginación -->
+<app-paginator *ngIf="!loading && filtered.length"
+  [total]="filtered.length" [overall]="sales.length" [hasFilters]="hasFilters"
+  [page]="page" [pageSize]="pageSize" singular="venta" plural="ventas"
+  (pageChange)="goTo($event)" (pageSizeChange)="setPageSize($event)">
+  · Total: <strong>{{ filteredTotal | money }}</strong>
+</app-paginator>
+
+<!-- Detalle de la venta -->
+<div class="sale-modal" *ngIf="selected as sale" role="dialog" aria-modal="true"
+  [attr.aria-label]="'Detalle de la venta ' + sale.id" (click)="close()">
+  <div class="sale-modal__box" (click)="$event.stopPropagation()">
+    <header class="sale-modal__head">
+      <div>
+        <h3>Venta #{{ sale.id }}</h3>
+        <span>{{ sale.created_at_datetime | date: 'd MMMM y, HH:mm' : undefined : 'es' }}</span>
+      </div>
+      <button type="button" class="sale-modal__close" title="Cerrar" aria-label="Cerrar" (click)="close()">
+        <i class="ri-close-line"></i>
+      </button>
+    </header>
+
+    <section class="sale-modal__user">
+      <span class="sale-modal__avatar"><i class="ri-user-3-line"></i></span>
+      <div *ngIf="sale.user; else noUserModal">
+        <strong>{{ sale.user.name }}</strong>
+        <div>{{ sale.user.email }}</div>
+      </div>
+      <ng-template #noUserModal><strong>Cliente no disponible</strong></ng-template>
+    </section>
+
+    <div class="sale-modal__body">
+      <table class="table align-middle mb-0">
+        <thead>
+          <tr>
+            <th>Producto</th>
+            <th class="text-end">Cant.</th>
+            <th class="text-end">Precio</th>
+            <th class="text-end">Subtotal</th>
+            <th class="text-end">Descuento</th>
+            <th class="text-end">Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let detail of sale.details">
+            <td>
+              <div class="d-flex align-items-center gap-2">
+                <app-thumb [src]="detail.image" [alt]="detail.product" [size]="40"></app-thumb>
+                <span>{{ detail.product }}</span>
+              </div>
+            </td>
+            <td class="text-end">{{ detail.quantity | number }}</td>
+            <td class="text-end">{{ detail.price | money }}</td>
+            <td class="text-end">{{ detail.subtotal | money }}</td>
+            <td class="text-end">
+              <ng-container *ngIf="detail.discount_percent > 0; else noDiscount">
+                <div class="text-discount">-{{ detail.discount_amount | money }}</div>
+                <div class="small text-secondary">{{ detail.discount_percent }}%</div>
+              </ng-container>
+              <ng-template #noDiscount><span class="text-secondary">—</span></ng-template>
+            </td>
+            <td class="text-end fw-bold">{{ detail.subtotal_with_discount | money }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <footer class="sale-modal__foot">
+      <span>{{ sale.details.length }} {{ sale.details.length === 1 ? 'producto' : 'productos' }} ·
+        {{ sale.units | number }} {{ sale.units === 1 ? 'unidad' : 'unidades' }}</span>
+      <div class="sale-modal__summary">
+        <ng-container *ngIf="sale.total_discount > 0">
+          <div class="sale-modal__line">
+            <span>Subtotal</span>
+            <span>{{ sale.total + sale.total_discount | money }}</span>
+          </div>
+          <div class="sale-modal__line text-discount">
+            <span>Descuento</span>
+            <span>-{{ sale.total_discount | money }}</span>
+          </div>
+        </ng-container>
+        <div class="sale-modal__total">
+          <small>Total</small>
+          <strong>{{ sale.total | money }}</strong>
+        </div>
+      </div>
+    </footer>
+  </div>
+</div>

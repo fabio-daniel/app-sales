@@ -1,0 +1,33 @@
+<div class="pager-bar">
+  <div class="pager-bar__info">
+    Mostrando {{ rangeStart }}–{{ rangeEnd }} de {{ total }} {{ total === 1 ? singular : plural }}
+    <span *ngIf="hasFilters && overall !== null">(de {{ overall }})</span>
+    <ng-content></ng-content>
+  </div>
+
+  <div class="pager-bar__controls">
+    <label class="pager-bar__size">
+      Filas
+      <select class="form-select form-select-sm" [ngModel]="pageSize" (ngModelChange)="pageSizeChange.emit(+$event)"
+        name="pageSize">
+        <option *ngFor="let size of pageSizes" [ngValue]="size">{{ size }}</option>
+      </select>
+    </label>
+
+    <nav class="pager" aria-label="Paginación">
+      <button type="button" title="Anterior" aria-label="Anterior" [disabled]="page === 1"
+        (click)="pageChange.emit(page - 1)">
+        <i class="ri-arrow-left-s-line"></i>
+      </button>
+      <ng-container *ngFor="let p of pageNumbers">
+        <span class="pager__gap" *ngIf="p === null">…</span>
+        <button type="button" *ngIf="p !== null" [class.active]="p === page"
+          [attr.aria-current]="p === page ? 'page' : null" (click)="pageChange.emit(p)">{{ p }}</button>
+      </ng-container>
+      <button type="button" title="Siguiente" aria-label="Siguiente" [disabled]="page === totalPages"
+        (click)="pageChange.emit(page + 1)">
+        <i class="ri-arrow-right-s-line"></i>
+      </button>
+    </nav>
+  </div>
+</div>

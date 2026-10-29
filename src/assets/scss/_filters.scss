@@ -1,0 +1,36 @@
+/*================ Barra de filtros de las listas ================*/
+.filters {
+  margin-bottom: 1rem;
+  padding: 1rem;
+  background-color: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+
+  &__search {
+    position: relative;
+
+    i {
+      position: absolute;
+      top: 50%;
+      left: 0.75rem;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+      pointer-events: none;
+    }
+  }
+
+  &__clear {
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+    font-size: 0.8125rem;
+  }
+
+  .form-control {
+    padding: 0.5rem 0.75rem;
+  }
+
+  /* va después de .form-control para que su padding izquierdo (espacio de la lupa) prevalezca */
+  .filters__search .form-control {
+    padding-left: 2.25rem;
+  }
+}

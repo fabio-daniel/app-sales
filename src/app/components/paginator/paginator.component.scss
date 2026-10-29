@@ -1,0 +1,75 @@
+:host {
+  display: block;
+}
+
+.pager-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-top: 1rem;
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+
+  ::ng-deep strong {
+    color: var(--text);
+  }
+
+  &__controls {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  &__size {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+
+    select {
+      width: auto;
+      padding: 0.25rem 1.75rem 0.25rem 0.5rem;
+    }
+  }
+}
+
+.pager {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+
+  button {
+    min-width: 32px;
+    height: 32px;
+    padding: 0 0.5rem;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--text);
+    background-color: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    transition: border-color 0.15s, background-color 0.15s;
+
+    &:hover:not(:disabled):not(.active) {
+      border-color: var(--accent);
+      color: var(--accent-text);
+    }
+
+    &.active {
+      color: #fff;
+      background-color: var(--accent);
+      border-color: var(--accent);
+    }
+
+    &:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+  }
+
+  &__gap {
+    padding: 0 0.25rem;
+    color: var(--text-muted);
+  }
+}

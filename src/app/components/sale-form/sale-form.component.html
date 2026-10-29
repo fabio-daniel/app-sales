@@ -1,0 +1,233 @@
+<div class="pos">
+  <!-- Catálogo -->
+  <section class="pos-catalog" aria-label="Catálogo de productos">
+    <header class="pos-pagehead">
+      <div>
+        <h1>Nueva venta</h1>
+        <p>Selecciona productos para registrar una orden de compra en el sistema.</p>
+      </div>
+      <div class="pos-pagehead__meta">
+        <a class="pos-back" routerLink="/sales"><i class="ri-arrow-left-line"></i> Volver</a>
+        <span>{{ today | date: 'd MMMM y' : undefined : 'es' }}</span>
+      </div>
+    </header>
+
+    <div class="pos-toolbar">
+      <div class="pos-search">
+        <i class="ri-search-line pos-search__icon"></i>
+        <input type="search" placeholder="Buscar producto por nombre..."
+          [value]="search" (input)="search = $any($event.target).value">
+      </div>
+      <a class="pos-back pos-back--dark" routerLink="/sales"><i class="ri-arrow-left-line"></i> Volver</a>
+    </div>
+
+    <div class="pos-grid-wrap">
+      <p class="pos-empty" *ngIf="loading">Cargando productos...</p>
+      <p class="pos-empty" *ngIf="!loading && !filteredProducts.length">No se encontraron productos.</p>
+
+      <div class="pos-grid">
+        <article class="pos-card" *ngFor="let product of filteredProducts"
+          [class.is-out]="remaining(product) < 1">
+          <div class="pos-card__media">
+            <img *ngIf="hasImage(product)" [src]="product.image" [alt]="product.name" loading="lazy"
+              (error)="brokenImages.add(product.id)">
+            <div class="pos-card__noimg" *ngIf="!hasImage(product)">
+              <i class="ri-image-line"></i><span>Sin foto</span>
+            </div>
+            <span class="pos-stock" [ngClass]="'is-' + stockState(product)">
+              <i class="pos-stock__dot"></i>
+              {{ stockState(product) === 'out' ? 'Agotado' : 'Stock: ' + (product.stock | number) }}
+            </span>
+            <span class="pos-incart" *ngIf="inCart(product)">{{ inCart(product) }} en carrito</span>
+          </div>
+          <div class="pos-card__body">
+            <h3 class="pos-card__name" [title]="product.name">{{ product.name }}</h3>
+            <div class="pos-card__foot">
+              <div class="pos-price">
+                <small>Precio</small>
+                <span>{{ product.price | money }}</span>
+              </div>
+              <button type="button" class="pos-add" [disabled]="remaining(product) < 1"
+                [title]="'Agregar ' + product.name" (click)="add(product)">
+                <i class="ri-add-line"></i>
+                <span class="pos-add__label">{{ remaining(product) < 1 ? 'Sin stock' : 'Agregar' }}</span>
+              </button>
+            </div>
+          </div>
+        </article>
+      </div>
+    </div>
+
+    <footer class="pos-catalog__foot">
+      <span><i class="pos-dot"></i> Mostrando {{ filteredProducts.length }} de {{ products.length }} productos</span>
+    </footer>
+  </section>
+
+  <!-- Carrito / ticket -->
+  <aside class="pos-ticket" aria-label="Carrito de compra">
+    <div class="pos-ticket__head">
+      <h2>
+        <span class="pos-ticket__icon"><i class="ri-shopping-cart-2-line"></i></span>
+        Carrito de compra
+      </h2>
+      <span class="pos-pill" *ngIf="cart.length">{{ count }} {{ count === 1 ? 'ítem' : 'ítems' }}</span>
+      <button type="button" class="pos-clear" *ngIf="cart.length" (click)="clear()">
+        <i class="ri-delete-bin-line"></i> Limpiar
+      </button>
+    </div>
+
+    <div class="pos-ticket__items">
+      <p class="pos-empty" *ngIf="!cart.length">Aún no agregaste productos.</p>
+
+      <ul class="pos-items" *ngIf="cart.length">
+        <li class="pos-item" *ngFor="let item of cart">
+          <div class="pos-item__top">
+            <div class="pos-item__info">
+              <h4>{{ item.product.name }}</h4>
+              <p>{{ item.product.price | money }} c/u · máx. {{ item.product.stock | number }}</p>
+            </div>
+            <div class="pos-item__sub">
+              <small class="pos-item__gross" *ngIf="item.discount">{{ subtotal(item) | money }}</small>
+              <span [class.is-discounted]="item.discount">{{ net(item) | money }}</span>
+            </div>
+          </div>
+          <div class="pos-item__ctrl">
+            <div class="pos-qty">
+              <button type="button" title="Restar" [disabled]="item.quantity <= 1" (click)="decrease(item)">−</button>
+              <input type="number" min="1" [max]="item.product.stock" [value]="item.quantity"
+                (change)="setQuantity(item, $any($event.target).value); $any($event.target).value = item.quantity">
+              <button type="button" title="Sumar" [disabled]="remaining(item.product) < 1"
+                (click)="add(item.product)">+</button>
+            </div>
+            <label class="pos-disc" title="Descuento por producto (0 a 10 %)">
+              <i class="ri-price-tag-3-line"></i>
+              <input type="number" min="0" max="10" step="1" [value]="item.discount" aria-label="Descuento en porcentaje"
+                (change)="setDiscount(item, $any($event.target).value); $any($event.target).value = item.discount">
+              <span>%</span>
+            </label>
+            <button type="button" class="pos-remove" title="Quitar" (click)="remove(item)">
+              <i class="ri-close-line"></i><span>Eliminar</span>
+            </button>
+          </div>
+        </li>
+      </ul>
+    </div>
+
+    <div class="pos-ticket__foot">
+      <div class="pos-summary">
+        <div class="pos-summary__row">
+          <span>Subtotal ({{ count }} {{ count === 1 ? 'artículo' : 'artículos' }})</span>
+          <span class="pos-num">{{ grossTotal | money }}</span>
+        </div>
+        <div class="pos-summary__row pos-summary__discount" *ngIf="totalDiscount">
+          <span>Descuento</span>
+          <span class="pos-num">-{{ totalDiscount | money }}</span>
+        </div>
+        <div class="pos-summary__total">
+          <span>Total a pagar</span>
+          <strong class="pos-num">{{ total | money }}</strong>
+        </div>
+      </div>
+
+      <button type="button" class="pos-confirm" [disabled]="!cart.length || saving" (click)="openConfirm()">
+        <i class="ri-checkbox-circle-fill"></i>
+        <span>Confirmar venta</span>
+      </button>
+    </div>
+  </aside>
+</div>
+
+<!-- Confirmación de la venta -->
+<div class="confirm" *ngIf="confirming" role="dialog" aria-modal="true" aria-label="Confirmar venta"
+  (click)="cancelConfirm()">
+  <div class="confirm__box" (click)="$event.stopPropagation()">
+    <header class="confirm__head">
+      <div>
+        <h3>Confirmar venta</h3>
+        <span>Revisa los datos antes de registrarla</span>
+      </div>
+      <button type="button" class="confirm__close" title="Cerrar" aria-label="Cerrar" [disabled]="saving"
+        (click)="cancelConfirm()">
+        <i class="ri-close-line"></i>
+      </button>
+    </header>
+
+    <section class="confirm__meta">
+      <div>
+        <small>Fecha</small>
+        <strong>{{ confirmDate | date: 'dd/MM/yyyy HH:mm' }}</strong>
+      </div>
+      <div>
+        <small>Usuario</small>
+        <strong>#{{ userId }}</strong>
+      </div>
+      <div>
+        <small>Productos</small>
+        <strong>{{ cart.length }} · {{ count | number }} {{ count === 1 ? 'unidad' : 'unidades' }}</strong>
+      </div>
+    </section>
+
+    <div class="confirm__body">
+      <table class="table align-middle mb-0">
+        <thead>
+          <tr>
+            <th>Producto</th>
+            <th class="text-end">Cant.</th>
+            <th class="text-end">Precio</th>
+            <th class="text-end">Subtotal</th>
+            <th class="text-end">Descuento</th>
+            <th class="text-end">Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let item of cart">
+            <td>
+              <div class="d-flex align-items-center gap-2">
+                <app-thumb [src]="hasImage(item.product) ? item.product.image : null" [alt]="item.product.name" [size]="36"></app-thumb>
+                <span>{{ item.product.name }}</span>
+              </div>
+            </td>
+            <td class="text-end">{{ item.quantity | number }}</td>
+            <td class="text-end">{{ item.product.price | money }}</td>
+            <td class="text-end">{{ subtotal(item) | money }}</td>
+            <td class="text-end">
+              <ng-container *ngIf="item.discount > 0; else noDiscount">
+                <div class="confirm__discount">-{{ discountAmount(item) | money }}</div>
+                <div class="small text-secondary">{{ item.discount }}%</div>
+              </ng-container>
+              <ng-template #noDiscount><span class="text-secondary">—</span></ng-template>
+            </td>
+            <td class="text-end fw-bold">{{ net(item) | money }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <footer class="confirm__foot">
+      <div class="confirm__summary">
+        <div class="confirm__line" *ngIf="totalDiscount > 0">
+          <span>Subtotal</span>
+          <span>{{ grossTotal | money }}</span>
+        </div>
+        <div class="confirm__line confirm__discount" *ngIf="totalDiscount > 0">
+          <span>Descuento</span>
+          <span>-{{ totalDiscount | money }}</span>
+        </div>
+        <div class="confirm__total">
+          <span>Total a pagar</span>
+          <strong>{{ total | money }}</strong>
+        </div>
+      </div>
+
+      <div class="confirm__actions">
+        <button type="button" class="confirm__btn" [disabled]="saving" (click)="cancelConfirm()">
+          Volver al carrito
+        </button>
+        <button type="button" class="confirm__btn confirm__btn--primary" [disabled]="saving" (click)="checkout()">
+          <i class="ri-checkbox-circle-fill"></i>
+          {{ saving ? 'Guardando...' : 'Registrar venta' }}
+        </button>
+      </div>
+    </footer>
+  </div>
+</div>

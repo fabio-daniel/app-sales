@@ -1,35 +1,81 @@
-@import 'variables';
-
 .navbar {
-  background-color: $my-dark-color;
+  background-color: #0f172a;
+  border-bottom: 1px solid #1e293b;
 
   .navbar-brand {
     font-weight: bold;
+    color: #fff;
 
-    span {
-      color: $my-secondary-light-color;
+    .brand-accent {
+      color: #60a5fa;
+      font-weight: 800;
+    }
+
+    .brand-icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      background-color: #2563eb;
+      color: #fff;
+      font-size: 1rem;
+      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.35);
     }
   }
 
   .nav-link {
-    position: relative;
-    padding-left: 0.5rem;
+    padding: 0.5rem 0.875rem;
+    border-radius: 8px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #cbd5e1;
+    transition: background-color 0.15s, color 0.15s;
 
-    &.active {
-      text-shadow: 0 0 6px rgba(52, 152, 219, 0.80);
+    &:hover {
+      color: #fff;
+      background-color: #1e293b;
     }
 
-    &.active::before {
-      content: '';
-      position: absolute;
-      top: 50%;
-      left: -2px;
-      transform: translateY(-50%);
-      display: inline-block;
-      height: 4px;
-      width: 4px;
-      background-color: $my-primary-color;
-      border-radius: 50%;
+    &.active {
+      color: #93c5fd;
+      font-weight: 600;
+      background-color: rgba(37, 99, 235, 0.2);
+      box-shadow: inset 0 0 0 1px rgba(96, 165, 250, 0.3);
+    }
+  }
+}
+
+.theme-switch {
+  display: inline-flex;
+  padding: 3px;
+  gap: 2px;
+  border: 1px solid #334155;
+  border-radius: 999px;
+  background-color: #1e293b;
+
+  button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: transparent;
+    color: #94a3b8;
+    font-size: 1rem;
+    transition: background-color 0.15s, color 0.15s;
+
+    &:hover {
+      color: #fff;
+    }
+
+    &.active {
+      background-color: #2563eb;
+      color: #fff;
     }
   }
 }

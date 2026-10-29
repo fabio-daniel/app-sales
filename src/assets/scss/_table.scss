@@ -37,7 +37,7 @@ table.table {
       position: relative;
       font-size: 1.05rem;
       text-decoration: none;
-      color: $my-dark-color;
+      color: var(--text);
       transition: 0.3s;
 
       &:hover {

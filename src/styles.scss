@@ -3,9 +3,10 @@
 @import 'assets/scss/table';
 @import 'assets/scss/button';
 @import 'toastify-js/src/toastify';
+@import 'assets/scss/theme';
+@import 'assets/scss/filters';
 
 .section-title {
   margin: 0;
   font-weight: bold;
-  color: $my-dark-color;
 }

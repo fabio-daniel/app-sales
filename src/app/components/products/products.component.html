@@ -1,0 +1,81 @@
+<div class="d-flex align-items-center justify-content-between my-4">
+  <h2 class="section-title">Productos</h2>
+</div>
+
+<!-- Filtros -->
+<form class="filters" (submit)="$event.preventDefault()">
+  <div class="row g-2 align-items-end">
+    <div class="col-12 col-lg-3">
+      <label class="form-label" for="p-search">Buscar</label>
+      <div class="filters__search">
+        <i class="ri-search-line"></i>
+        <input id="p-search" type="search" class="form-control" placeholder="Nombre o # de producto..."
+          [ngModel]="search" (ngModelChange)="search = $event; applyFilters()" name="search" autocomplete="off">
+      </div>
+    </div>
+    <div class="col-6 col-lg-2">
+      <label class="form-label" for="p-min-price">Precio mín.</label>
+      <input id="p-min-price" type="number" min="0" class="form-control" placeholder="0"
+        [ngModel]="minPrice" (ngModelChange)="minPrice = $event === '' ? null : $event; applyFilters()" name="minPrice">
+    </div>
+    <div class="col-6 col-lg-2">
+      <label class="form-label" for="p-max-price">Precio máx.</label>
+      <input id="p-max-price" type="number" min="0" class="form-control" placeholder="∞"
+        [ngModel]="maxPrice" (ngModelChange)="maxPrice = $event === '' ? null : $event; applyFilters()" name="maxPrice">
+    </div>
+    <div class="col-6 col-lg-2">
+      <label class="form-label" for="p-min-stock">Stock mín.</label>
+      <input id="p-min-stock" type="number" min="0" class="form-control" placeholder="0"
+        [ngModel]="minStock" (ngModelChange)="minStock = $event === '' ? null : $event; applyFilters()" name="minStock">
+    </div>
+    <div class="col-6 col-lg-2">
+      <label class="form-label" for="p-max-stock">Stock máx.</label>
+      <input id="p-max-stock" type="number" min="0" class="form-control" placeholder="∞"
+        [ngModel]="maxStock" (ngModelChange)="maxStock = $event === '' ? null : $event; applyFilters()" name="maxStock">
+    </div>
+    <div class="col-12 col-lg-1">
+      <button type="button" class="btn btn-outline-secondary w-100 filters__clear" title="Limpiar filtros"
+        [disabled]="!hasFilters" (click)="clearFilters()">
+        <i class="ri-filter-off-line"></i><span class="d-lg-none ms-1">Limpiar filtros</span>
+      </button>
+    </div>
+  </div>
+</form>
+
+<div class="table-responsive">
+  <table class="table align-middle">
+    <thead>
+      <tr>
+        <th>#</th>
+        <th style="width: 72px">Imagen</th>
+        <th>Nombre</th>
+        <th class="text-end">Precio</th>
+        <th class="text-end">Stock</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngIf="loading">
+        <td colspan="5" class="text-center">Cargando...</td>
+      </tr>
+      <tr *ngIf="!loading && !products.length">
+        <td colspan="5" class="text-center">No hay productos.</td>
+      </tr>
+      <tr *ngIf="!loading && products.length && !filtered.length">
+        <td colspan="5" class="text-center">No hay productos que coincidan con los filtros.</td>
+      </tr>
+      <tr *ngFor="let product of paged">
+        <td>{{ product.id }}</td>
+        <td><app-thumb [src]="product.image" [alt]="product.name"></app-thumb></td>
+        <td>{{ product.name }}</td>
+        <td class="text-end">{{ product.price | money }}</td>
+        <td class="text-end">{{ product.stock | number }}</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<app-paginator *ngIf="!loading && filtered.length"
+  [total]="filtered.length" [overall]="products.length" [hasFilters]="hasFilters"
+  [page]="page" [pageSize]="pageSize" singular="producto" plural="productos"
+  (pageChange)="goTo($event)" (pageSizeChange)="setPageSize($event)">
+</app-paginator>

@@ -1,0 +1,117 @@
+/*================ Theme tokens (claro / oscuro) ================*/
+:root,
+[data-theme='light'] {
+  --app-bg: #f8fafc;
+  --surface: #ffffff;
+  --surface-2: #f8fafc;
+  --surface-3: #f1f5f9;
+  --border: #e2e8f0;
+  --text: #0f172a;
+  --text-muted: #64748b;
+  --accent: #177ce9;
+  --accent-hover: #1163ca;
+  --accent-soft: #eef8ff;
+  --accent-text: #177ce9;
+  --price: #177ce9;
+  --success: #059669;
+  --danger: #ef4444;
+  --shadow: 0 1px 2px rgba(15, 23, 42, 0.06);
+  --shadow-hover: 0 8px 20px rgba(15, 23, 42, 0.1);
+  --font-base: 'Plus Jakarta Sans', 'Nunito Sans', sans-serif;
+  --font-num: 'Plus Jakarta Sans', 'Nunito Sans', sans-serif;
+}
+
+[data-theme='dark'] {
+  --app-bg: #020617;
+  --surface: #0f172a;
+  --surface-2: #1e293b;
+  --surface-3: #0b1220;
+  --border: #334155;
+  --text: #f1f5f9;
+  --text-muted: #94a3b8;
+  --accent: #2563eb;
+  --accent-hover: #3b82f6;
+  --accent-soft: rgba(37, 99, 235, 0.15);
+  --accent-text: #60a5fa;
+  --price: #ffffff;
+  --success: #34d399;
+  --danger: #fb7185;
+  --shadow: none;
+  --shadow-hover: 0 8px 24px rgba(23, 37, 84, 0.45);
+  --font-base: 'Inter', 'Nunito Sans', sans-serif;
+  --font-num: 'JetBrains Mono', Menlo, monospace;
+}
+
+body {
+  overflow-x: hidden;
+  background-color: var(--app-bg);
+  color: var(--text);
+  font-family: var(--font-base);
+  transition: background-color 0.2s, color 0.2s;
+}
+
+.section-title {
+  color: var(--text);
+}
+
+[data-theme='dark'] {
+  color-scheme: dark;
+}
+
+.form-control,
+.form-select {
+  color: var(--text);
+  background-color: var(--surface-2);
+  border-color: var(--border);
+  font-size: 0.875rem;
+
+  &::placeholder {
+    color: var(--text-muted);
+  }
+
+  &:focus {
+    color: var(--text);
+    background-color: var(--surface-2);
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-soft);
+  }
+}
+
+.form-label {
+  margin-bottom: 0.25rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.table-responsive {
+  background-color: var(--surface);
+  border: 1px solid var(--border);
+}
+
+table.table {
+  --bs-table-color: var(--text);
+  --bs-table-border-color: var(--border);
+
+  thead tr th {
+    color: var(--text-muted);
+  }
+
+  tbody tr td {
+    color: var(--text);
+  }
+}
+
+[data-theme='dark'] ::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+[data-theme='dark'] ::-webkit-scrollbar-track {
+  background: #0f172a;
+}
+
+[data-theme='dark'] ::-webkit-scrollbar-thumb {
+  background: #334155;
+  border-radius: 9999px;
+}
